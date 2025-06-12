@@ -8,35 +8,47 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    -name:checkout code
-    uses: actions/checkout@v4
-    -name:test code
-    run: ls -la
+      - name: touch file
+        run: echo "touch test.txt"
 
   build: 
     needs: test
     runs-on: ubuntu-latest
     steps:
-    -name:checkout code
-    uses: actions/checkout@v4
-    -name:build started 
-    run: echo "Build started"
+      - name: checkout code
+        run: echo "pip install ."
+      - name: build started 
+        run: echo "Build started"
   
   dockerize:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    -name:checkout code
-    uses: actions/checkout@v4
-    -name:create docker image
-    run: echo "docker build -t test:v1 deployment.yaml"
-    -name:push docker image
-    run: echo "docker push test:v1"
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: docker version
+        run: docker -v
+      - name: create docker image
+        run: echo "docker build -t test:v1"
+      - name: push docker image
+        run: echo "docker push test:v1"
   deploy:
     needs: dockerize
     runs-on: ubuntu-latest
     steps:
-    -name:checkout code
-    uses: actions/checkout@v4
-    -name:deploy on kuber
-    run: echo "Deploy on kubernetes"
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+      - name: install kubectx
+        run: |
+          curl -LO "https://github.com/ahmetb/kubectx/releases/download/v0.9.6/kubectx"
+      - name: kubectl version
+        run: kubectl version
+      - name: kubectx version
+        run: kubectx --version
+      - name: deploy on kubernetes
+        run: echo "kubectl apply -f deployment.yaml"
