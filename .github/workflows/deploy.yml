@@ -46,11 +46,14 @@ jobs:
       - name: install kubectx
         run: |
           curl -LO "https://github.com/ahmetb/kubectx/releases/download/v0.9.6/kubectx"
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
       - name: Set up kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
+        uses: azure/k8s-set-context@v3
+        with:
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
       - name: kubectl version
         run: kubectl --version
       - name: kubectx version
