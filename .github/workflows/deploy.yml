@@ -40,14 +40,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install kubectl
-        run: |
-          KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
-          echo "Installing kubectl version $KUBECTL_VERSION"
-          curl -L https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o kubectl
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/kubectl
-
+      
       - name: Install Minikube
         run: |
           curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
