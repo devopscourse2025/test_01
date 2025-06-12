@@ -21,12 +21,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-app-service
+  name: alpine-app-service
 spec:
   selector:
-    app: test-app
+    app: alpine-app
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
-  type: ClusterIP 
+  type: ClusterIP

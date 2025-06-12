@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        run: echo "pip install ."
+        uses: actions/checkout@v4
       - name: build started 
         run: echo "Build started"
   
@@ -29,45 +29,43 @@ jobs:
       - name: docker version
         run: docker -v
       - name: create docker image
-        run: echo "docker build -t test:v1"
+        run: echo "docker build -t test:v1 ."
       - name: push docker image
         run: echo "docker push test:v1"
+
   deploy:
     needs: dockerize
     runs-on: ubuntu-latest
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
-      - name: install kubectl
+
+      - name: Install kubectl
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-      - name: install kubectx
-        run: |
-          curl -LO "https://github.com/ahmetb/kubectx/releases/download/v0.9.6/kubectx"
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-      - name: Install minikube
+          curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
+
+      - name: Install Minikube
         run: |
           curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
           sudo install minikube-linux-amd64 /usr/local/bin/minikube
-      - name: Start minikube
+
+      - name: Start Minikube
         run: |
           minikube start --driver=docker
-      - name: Wait for minikube
-        run: |
           minikube status
           kubectl get nodes
-      - name: Set up kubeconfig
-        uses: azure/k8s-set-context@v3
-        with:
-          kubeconfig: ${{ secrets.KUBE_CONFIG }}
-      - name: kubectl version
-        run: kubectl --version
-      - name: kubectx version
-        run: kubectx --version
-      - name: deploy on kubernetes
-        run: echo "kubectl apply -f deployment.yaml"
+
+      - name: Show kubectl context and cluster info
+        run: |
+          kubectl config view
+          kubectl config current-context
+          kubectl cluster-info
+
+      - name: Apply deployment
+        run: kubectl apply -f deployment.yaml
+
+      - name: Verify pods and services
+        run: |
+          kubectl get pods
+          kubectl get svc
