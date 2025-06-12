@@ -50,6 +50,17 @@ jobs:
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
+      - name: Install minikube
+        run: |
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+      - name: Start minikube
+        run: |
+          minikube start --driver=docker
+      - name: Wait for minikube
+        run: |
+          minikube status
+          kubectl get nodes
       - name: Set up kubeconfig
         uses: azure/k8s-set-context@v3
         with:
@@ -58,4 +69,5 @@ jobs:
         run: kubectl --version
       - name: kubectx version
         run: kubectx --version
-      
+      - name: deploy on kubernetes
+        run: echo "kubectl apply -f deployment.yaml"
