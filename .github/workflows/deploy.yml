@@ -8,29 +8,29 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: touch file
+      - name: Touch file
         run: echo "touch test.txt"
 
   build: 
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
-      - name: build started 
+      - name: Build started 
         run: echo "Build started"
-  
+
   dockerize:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
-      - name: docker version
+      - name: Docker version
         run: docker -v
-      - name: create docker image
+      - name: Create docker image
         run: echo "docker build -t test:v1 ."
-      - name: push docker image
+      - name: Push docker image
         run: echo "docker push test:v1"
 
   deploy:
@@ -43,7 +43,8 @@ jobs:
       - name: Install kubectl
         run: |
           KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
-          curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
+          echo "Installing kubectl version $KUBECTL_VERSION"
+          curl -L https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o kubectl
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/kubectl
 
@@ -58,16 +59,16 @@ jobs:
           minikube status
           kubectl get nodes
 
-      - name: Show kubectl context and cluster info
+      - name: Show cluster info
         run: |
           kubectl config view
-          kubectl config current-context
           kubectl cluster-info
+          kubectl version
 
-      - name: Apply deployment
+      - name: Deploy to Kubernetes
         run: kubectl apply -f deployment.yaml
 
-      - name: Verify pods and services
+      - name: Verify deployment
         run: |
           kubectl get pods
           kubectl get svc
